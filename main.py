@@ -3,12 +3,17 @@ import torch
 import gradio as gr
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 
+# Load the model
 model_name = "sshleifer/distilbart-cnn-12-6"
 
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
 
+
 def summarize(text):
+    if not text or not text.strip():
+        return "Please enter some text to summarize."
+
     inputs = tokenizer(
         text,
         return_tensors="pt",
@@ -30,14 +35,31 @@ def summarize(text):
         skip_special_tokens=True
     )
 
-text = """The lion (Panthera leo) is a powerful big cat in the family
-Felidae, famously known as the king of the jungle. Lions have a
-muscular build, sharp claws, strong teeth, and a golden-yellow coat.
-Adult males have a thick, dark mane. Lions are social animals that
-live in prides consisting of females, cubs, and resident males.
-Lionesses cooperate to hunt zebras and antelopes, while males help
-defend the territory. Wild lions now live mostly in sub-Saharan
-Africa and in Gir National Park in Gujarat, India. They are listed
-as Vulnerable due to habitat loss and human-wildlife conflict."""
 
-print(summarize(text))
+# Create the Gradio interface
+demo = gr.Interface(
+    fn=summarize,
+    inputs=gr.Textbox(
+        lines=10,
+        label="Input Text",
+        placeholder="Paste an article or paragraph here..."
+    ),
+    outputs=gr.Textbox(
+        lines=5,
+        label="Summary"
+    ),
+    title="AI Text Summarizer",
+    description="Summarize long text using the DistilBART model.",
+    examples=[
+        [
+            "Lions are social animals that live in groups called prides. "
+            "Lionesses cooperate to hunt prey, while males help defend "
+            "the territory. Wild lions live mainly in sub-Saharan Africa "
+            "and in Gir National Park in India. They face threats from "
+            "habitat loss and human-wildlife conflict."
+        ]
+    ]
+)
+
+if __name__ == "__main__":
+    demo.launch(share=True)
