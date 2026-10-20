@@ -26,3 +26,7 @@ Thumbs.db
 
 # Logs
 *.log
+
+# Downloaded models and model caches
+models/
+.cache/
